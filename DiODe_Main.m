@@ -1,3 +1,15 @@
+%% DiODe Standalone
+%  This Software has been released under a GNU General Public License v3.0.
+%  If you are using it please credit the author via citing the following
+%  publications:
+%  Sitz et al., Medical Physics, 2017, Determining the orientation angle of
+%  directional leads for deep brain stimulation using computed tomography 
+%  and digital x-ray imaging: A phantom study.
+%  Hellerbach et al., Stereotactic and Functional Neurosurgery, 2018, DiODe:
+%  Directional Orientation Detection of Segmented Deep Brain Stimulation Leads:
+%  A Sequential Algorithm Based on CT Imaging.
+
+
 function roll_out = DiODe_Main(ctpath,elmodel,supervised,coordinates,elside)
 %% Determine Orientation for directed leads from postoperative CT
 % has an unsupervised and a supervised version
