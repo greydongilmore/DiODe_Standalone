@@ -1,22 +1,13 @@
 function [roll_y,y,roll_y_deg] = diode_standalone(ctpath, head_mm, tail_mm, myside, elmodel)
-% close all
-% clearvars
-% clc
-%% Example Inputs
-% ctpath = 'J:\Till\LEAD_singlePats\p_064\postop_ct.nii'; %% path to nifti file
-% head_mm = [27.3 -130 20.9]; %% image coordinates of the center of the most ventral contact
-% tail_mm = [31.5 -125.2 36.1]; %% image coordinates of the center of the most dorsal contact
-% myside = 1; %% 1 for right, 2 for left
-% options.elmodel = 'Boston Scientific Vercise Directed'; %% lead type -> see below for nomenclature
-
+if exist('spm') ~= 2
+    warning(['Please check if SPM has been installed correctly!'])
+end
 %%
 elspec = diode_elspec(elmodel);
 [ct,ct.img] = diode_load_nii(ctpath);
 sides = {'right','left','3','4','5','6','7','8'};
 for side = myside
     disp(['Reconstructing rotation of ' sides{side} ' lead!'])
-    % import lead information
-    %     load([folder 'ea_reconstruction.mat']); % included in for-loop to make independent ea_save_reconstruction for both sides
     
     %% transform head/tail coordinates from native to image coordinates
     tmat_vx2mm = ct.mat;
