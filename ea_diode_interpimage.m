@@ -1,4 +1,4 @@
-function interVal=ea_orient_interpimg(img,yx,zpad)
+function interVal=ea_diode_interpimage(img,yx,zpad)
 % BiLinear interpolation using 4 pixels around the target location with ceil convention
 % RGB = 1 for gray scale images.
 % img can be a single layer matrix or a RGB layer colored image
