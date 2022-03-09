@@ -545,7 +545,7 @@ title(ax1,'Marker')
 imagesc(artifact_marker')
 view(-180,-90)
 axis equal
-axis off
+%axis off
 colormap(gray)
 caxis manual
 caxis(cscale)
