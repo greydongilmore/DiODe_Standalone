@@ -1,4 +1,4 @@
-function [roll_y,y,solution] = ea_diode_auto(side,ct,head_mm,unitvector_mm,tmat_vx2mm,elspec)
+function [roll_y,y,solution] = ea_diode_auto(side,ct,head_mm_initial,unitvector_mm,tmat_vx2mm,elspec)
 if ~strcmp(elspec.matfname, 'boston_vercise_directed')
     msg = sprintf(['Warning: DiODe has only been phantom-validated for Boston Scientific direcional lead!']);
     choice = questdlg(msg,'Warning!','Continue','Continue');
@@ -30,9 +30,9 @@ load(elspec.matfname);
 
 % sampling from head to 10mm above it in .5mm steps
 samplelength = 20;
-samplingvector_mm = vertcat([head_mm(1):unitvector_mm(1)./2:head_mm(1)+ samplelength*unitvector_mm(1)],...
-    [head_mm(2):unitvector_mm(2)./2:head_mm(2)+ samplelength*unitvector_mm(2)],...
-    [head_mm(3):unitvector_mm(3)./2:head_mm(3)+ samplelength*unitvector_mm(3)],...
+samplingvector_mm = vertcat([head_mm_initial(1):unitvector_mm(1)./2:head_mm_initial(1)+ samplelength*unitvector_mm(1)],...
+    [head_mm_initial(2):unitvector_mm(2)./2:head_mm_initial(2)+ samplelength*unitvector_mm(2)],...
+    [head_mm_initial(3):unitvector_mm(3)./2:head_mm_initial(3)+ samplelength*unitvector_mm(3)],...
     ones(1, samplelength*2+1));
 samplingvector_vx = round(tmat_vx2mm\samplingvector_mm);
 
@@ -60,7 +60,9 @@ for k = 1:size(samplingvector_vx,2)
     end
 end
 
-newcentervector_mm = tmat_vx2mm * newcentervector_vx;
+%newcentervector_mm = tmat_vx2mm * newcentervector_vx;
+newcentervector_mm = samplingvector_mm
+
 if numel(find(isnan(newcentervector_mm))) > 0.5 * numel(newcentervector_mm)
     error('Something went wrong with interpolation of the Lead - maybe wrong sForm/qForm was chosen?')
 end
@@ -121,7 +123,7 @@ for k = checkslices
     radius = 4;
     
     % calculate intensityprofile and its FFT for each slice
-    [~, intensity,~] = ea_diode_intensityprofile(tmp,center_tmp,ct.voxsize,radius);
+    [ang, intensity,~] = ea_diode_intensityprofile(tmp,center_tmp,ct.voxsize,radius);
     [peak,tmpfft] = ea_diode_intensitypeaksFFT(intensity,2);
     valley = ea_diode_intensitypeaksFFT(-intensity,2);
     fftdiff(count) = mean(tmpfft(peak)) - mean(tmpfft(valley));
@@ -298,7 +300,7 @@ end
 %             plot3([marker_mm(1), marker_mm(1)+yvec_mm(1)],[marker_mm(2), marker_mm(2)+yvec_mm(2)],[marker_mm(3), marker_mm(3)+yvec_mm(3)],'r')
 %             plot3([marker_mm(1), marker_mm(1)+unitvector_mm(1)],[marker_mm(2), marker_mm(2)+unitvector_mm(2)],[marker_mm(3), marker_mm(3)+unitvector_mm(3)],'g')
 %             axis equal
-%             scatter3(COG_mm(1),COG_mm(2),COG_mm(3),'g')
+%             scatter3(COG_mm(1),COG_mm(2),COG_mm(3),'g')Solution1Button
 %             scatter3(marker_mm(1)+COG_dir(1),marker_mm(2)+COG_dir(2),marker_mm(3)+COG_dir(3),'b')
 %             caxis([-500 3500])
 %             close
@@ -573,7 +575,7 @@ plot(ax2,rad2deg(angle),markerfft)
 scatter(ax2,rad2deg(angle(peak)), intensity(peak),'g');
 scatter(ax2,rad2deg(angle(finalpeak(side))), intensity(finalpeak(side)),'g','filled');
 scatter(ax2,rad2deg(angle(valley)), intensity(valley),'r');
-set(ax2,'yticklabel',{[]})
+%set(ax2,'yticklabel',{[]})
 
 ax3 = subplot(3,3,3);
 hold on
@@ -676,6 +678,13 @@ clear tempangle
 
 set(ax_elec,'Position',[-0.16 0.38 0.43 0.45])
 
+[filepath,name,ext] = fileparts(ct.fname);
+side_str='left';
+if side == 1
+    side_str='right';
+end
+
+out_name=fullfile(filepath,'imgs', [name,'_side-',side_str,'_matlab_auto.png']);
 %% get results
 if round(sumintensitynew{[1 2] == realsolution}(darkstarangle([1 2] == realsolution))) <= -200
     checkbox1 = set(fig(side).chk1,'Value',1);
@@ -712,6 +721,7 @@ if savestate == 1
     head = head_mm(1:3);
     y = head + y;
     y(4) = 1;
+    saveas(fig(side).figure,out_name)
 elseif retrystate == 0
     disp(['Changes to rotation not saved'])
     roll_y = [];
@@ -722,6 +732,7 @@ elseif retrystate == 1
     y = y_retry;
 end
 close(fig(side).figure)
+
 end
 
 function buttonPress(hObject,eventdata)

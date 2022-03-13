@@ -784,6 +784,14 @@ clear tempangle
 
 set(ax_elec,'Position',[-0.16 0.38 0.43 0.45])
 
+[filepath,name,ext] = fileparts(ct.fname);
+
+side_str='left';
+if side == 1
+    side_str='right';
+end
+
+out_name=fullfile(filepath,'imgs', [name,'_side-',side_str,'_matlab_manual.png']);
 %% get results
 if round(sumintensitynew{[1 2] == realsolution}(darkstarangle([1 2] == realsolution))) <= -200
     checkbox1 = set(fig(side).chk1,'Value',1);
@@ -830,6 +838,7 @@ if savestate == 1
     head = head_mm(1:3);
     y = head + y;
     y(4) = 1;
+    
 elseif retrystate == 0
     disp(['Changes to rotation not saved'])
     roll_y = [];
@@ -839,6 +848,7 @@ elseif retrystate == 1
     roll_y = roll_y_retry;
     y = y_retry;
 end
+saveas(fig(side).figure,out_name)
 close(fig(side).figure)
 end
 
